@@ -8,7 +8,7 @@ output "alarm_cpu_utilization_too_high" {
 
 output "alarm_cpu_credit_balance_too_low" {
   # For older terraform support...
-  value = var.create_low_cpu_credit_alarm ? length(regexall("(t2|t3)", var.db_instance_class)) > 0 ? aws_cloudwatch_metric_alarm.cpu_credit_balance_too_low[0] : null : null
+  value = var.create_low_cpu_credit_alarm ? length(regexall("(t2|t3|t4g)", var.db_instance_class)) > 0 ? aws_cloudwatch_metric_alarm.cpu_credit_balance_too_low[0] : null : null
   # For Terraform 0.15+, eventually use this much nicer code instead...
   # value       = one(aws_cloudwatch_metric_alarm.cpu_credit_balance_too_low.*)
   description = "The CloudWatch Metric Alarm resource block for low CPU Credit Balance"
