@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
+}
+
 // CPU Utilization
 resource "aws_cloudwatch_metric_alarm" "cpu_utilization_too_high" {
   count               = var.create_high_cpu_alarm ? 1 : 0
@@ -192,4 +200,43 @@ resource "aws_cloudwatch_metric_alarm" "maximum_used_transaction_ids_too_high" {
   alarm_description   = "Nearing a possible critical transaction ID wraparound."
   alarm_actions       = var.actions_alarm
   ok_actions          = var.actions_ok
+}
+
+# SOC2 requirements
+resource "aws_cloudwatch_metric_alarm" "read_iops_too_high" {
+  count               = var.create_read_iops_alarm ? 1 : 0
+  alarm_name          = "${var.prefix}rds-${var.db_instance_id}-read-iops-too-high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = var.evaluation_period
+  metric_name         = "ReadIOPS"
+  namespace           = "AWS/RDS"
+  period              = var.statistic_period
+  statistic           = "Average"
+  threshold           = var.read_iops_too_high_threshold
+  alarm_description   = "Average Read IO over last ${(var.evaluation_period * var.statistic_period / 60)} minutes too high, performance may suffer"
+  alarm_actions       = var.actions_alarm
+  ok_actions          = var.actions_ok
+
+  dimensions = {
+    DBInstanceIdentifier = var.db_instance_id
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "write_iops_too_high" {
+  count               = var.create_write_iops_alarm ? 1 : 0
+  alarm_name          = "${var.prefix}rds-${var.db_instance_id}-write-iops-too-high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = var.evaluation_period
+  metric_name         = "WriteIOPS"
+  namespace           = "AWS/RDS"
+  period              = var.statistic_period
+  statistic           = "Average"
+  threshold           = var.write_iops_too_high_threshold
+  alarm_description   = "Average Write IO over last ${(var.evaluation_period * var.statistic_period / 60)} minutes too high, performance may suffer"
+  alarm_actions       = var.actions_alarm
+  ok_actions          = var.actions_ok
+
+  dimensions = {
+    DBInstanceIdentifier = var.db_instance_id
+  }
 }
